@@ -24,31 +24,46 @@ output_csv <- arguments$output_csv
 
 dt_tmp = fread(input_csv)
 
-dt_tmp = dt_tmp[!is.na(smiles_harmonized) & smiles_harmonized != '', c("data_source_is", "dbid_Broad", 
-                                                                       "name", "inchikey", "csv_file_name", "dbid_chembl", "smiles", "dbid_CyanoMetDB", 
-                                                                       "mf", "monomass", "dbid_drugCentral", "dbid_HMDB", "dbid_PubChem", "dbid_PubChemLite", 
-                                                                       "dbid_NORMAN", "dbid_T3DB", "smiles_harmonized", "has_primaryAmine", "has_secondaryAmine", 
-                                                                       "has_carboxylicAcid", "has_alcohol", "has_phenol", "has_alkene"
-)]
+all_cols = colnames(dt_tmp)
+general_cols = c('smiles_harmonized', 'data_source_is', 'name', 'inchikey', 'mf' ,'monomass', 'csv_file_name')
+id_cols = all_cols[grepl('dbid_', all_cols)]
+structure_cols = all_cols[grepl('has_', all_cols)]
 
-dt_tmp_2 = dt_tmp[, .(data_source_is = {cat("progress",.GRP/.NGRP*100,"%\n"); paste0(unique(data_source_is), collapse = ", ")},
-                      #name = as.character(as.data.frame(table(name))$'Var1'[which.max(as.data.frame(table(name))$'Freq')]), 
-                      synonyms = paste0(unique(name), collapse = ", "),
-                      mf = unique(mf[!is.na(mf) & mf != ''])[1],
-                      monomass = unique(monomass[!is.na(monomass) & monomass != ''])[1],
-                      inchikey = unique(inchikey[!is.na(inchikey) & inchikey != ''])[1],
-                      csv_file_name = paste0(unique(csv_file_name), collapse = ', '),
-                      dbid_chembl = paste0(unique(dbid_chembl[!is.na(dbid_chembl) & dbid_chembl != '']), collapse = ', '),
-                      dbid_Broad = paste0(unique(dbid_Broad[!is.na(dbid_Broad) & dbid_Broad != '']), collapse = ', '),
-                      dbid_CyanoMetDB = paste0(unique(dbid_CyanoMetDB[!is.na(dbid_CyanoMetDB) & dbid_CyanoMetDB != '']), collapse = ', '),
-                      dbid_NORMAN = paste0(unique(dbid_NORMAN[!is.na(dbid_NORMAN) & dbid_NORMAN != '']), collapse = ', '),
-                      dbid_T3DB = paste0(unique(dbid_T3DB[!is.na(dbid_T3DB) & dbid_T3DB != '']), collapse = ', '),
-                      dbid_drugCentral = paste0(unique(dbid_drugCentral[!is.na(dbid_drugCentral) & dbid_drugCentral != '']), collapse = ', '),
-                      dbid_HMDB = paste0(unique(dbid_HMDB[!is.na(dbid_HMDB) & dbid_HMDB != '']), collapse = ', '),
-                      dbid_PubChem = paste0(unique(dbid_PubChem[!is.na(dbid_PubChem) & dbid_PubChem != '']), collapse = ', '),
-                      dbid_PubChemLite = paste0(unique(dbid_PubChemLite[!is.na(dbid_PubChemLite) & dbid_PubChemLite != '']), collapse = ', ')
-), by = .(smiles_harmonized, has_primaryAmine, has_secondaryAmine, 
-          has_carboxylicAcid, has_alcohol, has_phenol, has_alkene)]
+use_cols = c(general_cols, structure_cols, id_cols)
+
+dt_tmp = dt_tmp[!is.na(smiles_harmonized) & smiles_harmonized != '', ..use_cols]
+
+
+# Get column names
+colnames <- names(dt_tmp)
+
+# Filter column names that contain 'dbid_'
+dbid_cols <- colnames[grep('^dbid_', colnames)]
+by_cols <- c('smiles_harmonized', colnames[grep('^has_', colnames)])
+
+# Initialize string to store expressions
+expr_str <- "list(
+  data_source_is = {
+    cat('progress', .GRP/.NGRP*100, '%\n'); 
+    paste0(unique(data_source_is), collapse = ', ')
+  },
+  synonyms = paste0(unique(name), collapse = ', '),
+  mf = unique(mf[!is.na(mf) & mf != ''])[1],
+  monomass = unique(monomass[!is.na(monomass) & monomass != ''])[1],
+  inchikey = unique(inchikey[!is.na(inchikey) & inchikey != ''])[1],
+  csv_file_name = paste0(unique(csv_file_name), collapse = ', ')
+"
+
+# Add dbid column expressions to the string
+for(col in dbid_cols){
+  expr_str <- paste0(expr_str, ", ", col, " = paste0(unique(", col, "[!is.na(", col, ") & ", col, " != '']), collapse = ', ')")
+}
+
+expr_str <- paste0(expr_str, ")")
+by_cols <- paste0("list(", paste(by_cols, collapse = ", "), ")")
+
+
+dt_tmp_2 = dt_tmp[, eval(parse(text = expr_str)), by = eval(parse(text = by_cols))]
 
 
 fwrite(dt_tmp_2, output_csv)

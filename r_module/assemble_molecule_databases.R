@@ -142,6 +142,38 @@ for(i in seq(length(databases_csvs))){
     setnames(dt_tmp, 'smiles', 'smiles')
     setnames(dt_tmp, 'inchi_key', 'inchikey')
     
+  } else if(grepl('foodDB', basename(databases_csv))){
+    dt_tmp = fread(databases_csv)
+    dt_tmp[, data_source_is := 'FoodDB']
+    dt_tmp[, csv_file_name := basename(databases_csv)]
+    dt_tmp[, dbid_FoodDB := public_id]
+    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_FoodDB', 'name', 'cas_number', 'moldb_inchikey', 'csv_file_name')]
+    setnames(dt_tmp, 'name', 'name')
+    setnames(dt_tmp, 'cas_number', 'smiles')
+    setnames(dt_tmp, 'moldb_inchikey', 'inchikey')
+    
+  } else if(grepl('PolyphenolDB_metabolites', basename(databases_csv))){
+    dt_tmp = fread(databases_csv)
+    dt_tmp[, data_source_is := 'PolyphenolDB_metabolites']
+    dt_tmp[, csv_file_name := basename(databases_csv)]
+    dt_tmp[, dbid_PolyphenolDBm := id]
+    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_PolyphenolDBm', 'name', 'smiles', 'formula', 'csv_file_name')]
+    setnames(dt_tmp, 'name', 'name')
+    setnames(dt_tmp, 'smiles', 'smiles')
+    setnames(dt_tmp, 'formula', 'mf')
+    
+  } else if(grepl('PolyphenolDB_compounds', basename(databases_csv))){
+    dt_tmp = fread(databases_csv)
+    dt_tmp[, data_source_is := 'PolyphenolDB_compounds']
+    dt_tmp[, csv_file_name := basename(databases_csv)]
+    dt_tmp[, dbid_PolyphenolDBc := id]
+    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_PolyphenolDBc', 'name', 'smiles', 'formula', 'csv_file_name')]
+    setnames(dt_tmp, 'name', 'name')
+    setnames(dt_tmp, 'smiles', 'smiles')
+    setnames(dt_tmp, 'formula', 'mf')
+    
+  } else {
+    warning('Ignore ', basename(databases_csv))
   }
 
   li_collection[[i]] = dt_tmp

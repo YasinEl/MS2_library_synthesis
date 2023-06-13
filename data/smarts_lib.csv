@@ -1,0 +1,12 @@
+smarts_name,smarts
+primaryAmine,[NX3;H2;!$(NC=[!#6]);!$(NC#[!#6])][#6]
+secondaryAmine,[NX3;H1;!$(NC=O);!$(NC=S)]
+carboxylicAcid,[CX3](=O)[OX2H1]
+alcohol,[OH1][CX4;!$(C=O);!$(C=S)]
+phenol,[OH1][cH0]
+alkene,[CX3]=[CX3]
+thiol,[SH1][CX4;!$(C=O);!$(C=S)]
+ester,[#6](=[#8])(-[#8]-[#6])
+phosphate,[#15](=O)(O)(O)O
+ketone,[#6][CX3](=O)[#6]
+aldehyde,[CX3H1](=O)[#6]
