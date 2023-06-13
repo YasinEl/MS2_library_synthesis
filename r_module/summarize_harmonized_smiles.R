@@ -19,27 +19,21 @@ input_csv <- arguments$input_csv
 output_csv <- arguments$output_csv
 
 
-
-
-
+#read data.table
 dt_tmp = fread(input_csv)
 
+#retain columns and remove empty harmonized_smiles
 all_cols = colnames(dt_tmp)
 general_cols = c('smiles_harmonized', 'data_source_is', 'name', 'inchikey', 'mf' ,'monomass', 'csv_file_name')
 id_cols = all_cols[grepl('dbid_', all_cols)]
 structure_cols = all_cols[grepl('has_', all_cols)]
-
 use_cols = c(general_cols, structure_cols, id_cols)
-
 dt_tmp = dt_tmp[!is.na(smiles_harmonized) & smiles_harmonized != '', ..use_cols]
 
 
-# Get column names
-colnames <- names(dt_tmp)
-
-# Filter column names that contain 'dbid_'
-dbid_cols <- colnames[grep('^dbid_', colnames)]
-by_cols <- c('smiles_harmonized', colnames[grep('^has_', colnames)])
+# Filter column names that contain 'dbid_' or 'has_'
+dbid_cols <- all_cols[grep('^dbid_', all_cols)]
+by_cols <- c('smiles_harmonized', all_cols[grep('^has_', all_cols)])
 
 # Initialize string to store expressions
 expr_str <- "list(
@@ -54,18 +48,19 @@ expr_str <- "list(
   csv_file_name = paste0(unique(csv_file_name), collapse = ', ')
 "
 
-# Add dbid column expressions to the string
+# Add dbid column expressions to the string to summarize all IDs
 for(col in dbid_cols){
   expr_str <- paste0(expr_str, ", ", col, " = paste0(unique(", col, "[!is.na(", col, ") & ", col, " != '']), collapse = ', ')")
 }
 
+# Assemble code elements
 expr_str <- paste0(expr_str, ")")
 by_cols <- paste0("list(", paste(by_cols, collapse = ", "), ")")
 
-
+#Summarize results table
 dt_tmp_2 = dt_tmp[, eval(parse(text = expr_str)), by = eval(parse(text = by_cols))]
 
-
+#write output
 fwrite(dt_tmp_2, output_csv)
 
 
