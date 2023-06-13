@@ -67,8 +67,8 @@ for file in file_list
 			
                 			try #If there is an error retrieving any of this, skip this metabolite 
 
-                                m["fbc:charge"]
-                    			m["fbc:chemicalFormula"]
+                                		m["fbc:charge"]
+                    				m["fbc:chemicalFormula"]
 
                 			catch e
                 				continue
