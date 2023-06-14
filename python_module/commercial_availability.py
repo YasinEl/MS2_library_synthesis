@@ -11,7 +11,7 @@ df = pd.read_csv("database_accumulation.csv", low_memory=False)
 for index,row in df.iterrows():
     smiles = row['smiles']
     try:
-        df.at[index, 'commercially_available'] = buy(smiles, catalog='zinc20', canonicalize=True)
+        df.at[index, 'commercially_available'] = buy(smiles, catalog='zinc-instock', canonicalize=True)
     except: 
         df.at[index, 'commercially_available'] = "SMILES_error"
         continue
