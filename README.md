@@ -9,11 +9,9 @@ First, set the path to the project directory. For example:
 cd C:\Users\Dorrestein Lab\MS2_library_synthesis
 ```
 
-To combine all different databases into one CSV file, run:
-
-
+To combine all different databases into one CSV file, you have to have first download them (e.g. from the google drive). You must not change the column names in these csv files, and also not the csv file itself! You can also add more databases if you want as csv or tsv files. If you do you need to extend the file in data/database_nomenclature.csv. Just add a column with the appropriate column names as has been done for the others. The first row should be a substring of the csv file name (make sure it appears ONLY in the csvs you want this substring to match to; can be multiple). The second row should be the name of the database. I hope the rest is intuitive. Afterwards you can assemble all databases like this:
 ```bash
-Rscript r_module\assemble_molecule_databases.R -i Z:\5M_molecules\datasources\prepared -o Z:\5M_molecules\database_accumulation.csv
+Rscript r_module\assemble_molecule_databases.R -i Z:\5M_molecules\datasources\prepared -o Z:\5M_molecules\database_accumulation.csv -n data\database_nomenclature.csv
 ```
 This merges different IDs, SMILES, etc., into the same columns and removes unused columns.
 
