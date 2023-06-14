@@ -1,12 +1,13 @@
 library(optparse)
 library(data.table)
 
-
 option_list = list(
   make_option(c("-i", "--input_folder"), type="character", default=NULL,
               help="In which folder are csv or tsv files to be used?", metavar="character"),
   make_option(c("-o", "--output_csv"), type="character", default=NULL,
-              help="Path to output csv [default= %default]", metavar="character")
+              help="Path to output csv [default= %default]", metavar="character"),
+  make_option(c("-n", "--nomenclature_csv"), type="character", default=NULL,
+              help="Path to the database nomenclature csv [default= %default]", metavar="character")
 )
 
 
@@ -15,14 +16,18 @@ parser = OptionParser(option_list=option_list,
                       The same is true for the csv file names. Thiw will remove most columns and keep only a few.")
 arguments = parse_args(parser)
 
+
 # Extract the input and output file paths
 input_folder <- arguments$input_folder
 output_file <- arguments$output_csv
-
+nomenclature_file <- arguments$nomenclature_csv
 
 
 databases_csvs = list.files(input_folder, full.names = TRUE, pattern = '\\.(csv|tsv)$')
 
+dt_nomenclature = fread(nomenclature_file)
+
+csv_triggers = colnames(dt_nomenclature)[-1]
 
 li_collection = list()
 length(li_collection) = length(databases_csvs)
@@ -32,154 +37,40 @@ for(i in seq(length(databases_csvs))){
   
   print(paste0(c(basename(databases_csv), ' (', i, '/', length(databases_csvs), ')'), collapse = ''))
   
+  trigger_hit = csv_triggers[sapply(csv_triggers , function(x) grepl(x, basename(databases_csv)))]
   
-  if(grepl('PubChem_compound_list', basename(databases_csv))){
-    
+  if(length(trigger_hit) > 0){
     dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'PubChem']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_PubChem := cid]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_PubChem', 'cmpdname', 'mf', 'exactmass', 'canonicalsmiles', 'inchikey', 'csv_file_name')]
-    setnames(dt_tmp, 'cmpdname', 'name')
-    setnames(dt_tmp, 'exactmass', 'monomass')
-    setnames(dt_tmp, 'canonicalsmiles', 'smiles')
     
-  } else if(grepl('HMDB', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'HMDB']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_HMDB := HMDB_ID]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_HMDB', 'NAME', 'CHEMICAL_FORMULA', 'MONO_MASS', 'SMILES', 'INCHIKEY', 'csv_file_name')]
-    setnames(dt_tmp, 'NAME', 'name')
-    setnames(dt_tmp, 'CHEMICAL_FORMULA', 'mf')
-    setnames(dt_tmp, 'MONO_MASS', 'monomass')
-    setnames(dt_tmp, 'SMILES', 'smiles')
-    setnames(dt_tmp, 'INCHIKEY', 'inchikey')
+    #put the database name
+    dt_tmp[, data_source_is := suppressWarnings(unname(dt_nomenclature[Info_by_database == 'database', ..trigger_hit]))]
     
-  } else if(grepl('CyanoMetDB', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'CyanoMetDB']
+    #put the csv file name
     dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_CyanoMetDB := `Compound identifier`]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_CyanoMetDB', 'Compound name', 'Molecular formula (neutral)', 'Monoisotopic mass (neutral)', 'SMILES (canonical or isomeric)', 'InChlKey', 'csv_file_name')]
-    setnames(dt_tmp, 'Compound name', 'name')
-    setnames(dt_tmp, 'Molecular formula (neutral)', 'mf')
-    setnames(dt_tmp, 'Monoisotopic mass (neutral)', 'monomass')
-    setnames(dt_tmp, 'SMILES (canonical or isomeric)', 'smiles')
-    setnames(dt_tmp, 'InChlKey', 'inchikey')
     
-  } else if(grepl('PubChemLite', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'PubChem Lite']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_PubChemLite := Identifier]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_PubChemLite', 'Synonym', 'MolecularFormula', 'MonoisotopicMass', 'SMILES', 'InChIKey', 'csv_file_name')]
-    setnames(dt_tmp, 'Synonym', 'name')
-    setnames(dt_tmp, 'MolecularFormula', 'mf')
-    setnames(dt_tmp, 'MonoisotopicMass', 'monomass')
-    setnames(dt_tmp, 'SMILES', 'smiles')
-    setnames(dt_tmp, 'InChIKey', 'inchikey')
+    #add the ID from the database
+    db_id = paste0(c('dbid_', suppressWarnings(unname(dt_nomenclature[Info_by_database == 'database', ..trigger_hit]))), collapse = '')
+    dbid_col = suppressWarnings(unlist(unname(dt_nomenclature[Info_by_database == 'database id', ..trigger_hit])))
+    setnames(dt_tmp, dbid_col, db_id)
     
-  } else if(grepl('susdat_', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'NORMAN']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_NORMAN := Norman_SusDat_ID]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_NORMAN', 'Name', 'Molecular_Formula', 'Monoiso_Mass', 'MS_Ready_SMILES', 'MS_Ready_StdInChIKey', 'csv_file_name')]
-    setnames(dt_tmp, 'Name', 'name')
-    setnames(dt_tmp, 'Molecular_Formula', 'mf')
-    setnames(dt_tmp, 'Monoiso_Mass', 'monomass')
-    setnames(dt_tmp, 'MS_Ready_SMILES', 'smiles')
-    setnames(dt_tmp, 'MS_Ready_StdInChIKey', 'inchikey')
+    #set the columns that should be kept
+    db_cols =  suppressWarnings(unlist(unname(dt_nomenclature[!(Info_by_database %in% c('database','database id')), ..trigger_hit])))
+    db_cols = db_cols[!is.na(db_cols) & db_cols != '']
+    cols_to_keep = c('data_source_is', db_id, 'csv_file_name', db_cols)
+    dt_tmp = dt_tmp[, ..cols_to_keep]
     
-  }  else if(grepl('toxins.csv', basename(databases_csv), fixed = TRUE)){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'T3DB']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_T3DB := `T3DB ID`]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_T3DB', 'Name', 'Chemical Formula', 'Monoisotopic Mass', 'SMILES', 'InChI Key', 'csv_file_name')]
-    setnames(dt_tmp, 'Name', 'name')
-    setnames(dt_tmp, 'Chemical Formula', 'mf')
-    setnames(dt_tmp, 'Monoisotopic Mass', 'monomass')
-    setnames(dt_tmp, 'SMILES', 'smiles')
-    setnames(dt_tmp, 'InChI Key', 'inchikey')
-    
-  }  else if(grepl('drugCentral', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'drugCentral']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_drugCentral := id]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_drugCentral', 'name', 'smiles', 'inchikey', 'csv_file_name')]
-    setnames(dt_tmp, 'name', 'name')
-    setnames(dt_tmp, 'smiles', 'smiles')
-    setnames(dt_tmp, 'inchikey', 'inchikey')
-    
-  }  else if(grepl('Broad_Institute', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'Broad Institute Drug List']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_Broad := Broad_ID]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_Broad', 'pert_iname', 'InChIKey', 'csv_file_name')]
-    setnames(dt_tmp, 'pert_iname', 'name')
-    setnames(dt_tmp, 'InChIKey', 'inchikey')
-    
-  }  else if(grepl('chembl_final', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'chembl']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_chembl := chembl_id]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_chembl', 'compound_name', 'canonical_smiles', 'csv_file_name')]
-    setnames(dt_tmp, 'compound_name', 'name')
-    setnames(dt_tmp, 'canonical_smiles', 'smiles')
-    
-  }  else if(grepl('drugbank_final', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'drugbank']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_drugbank := drugbank_id]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_drugbank', 'name', 'smiles', 'inchi_key', 'csv_file_name')]
-    setnames(dt_tmp, 'name', 'name')
-    setnames(dt_tmp, 'smiles', 'smiles')
-    setnames(dt_tmp, 'inchi_key', 'inchikey')
-    
-  } else if(grepl('foodDB', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'FoodDB']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_FoodDB := public_id]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_FoodDB', 'name', 'cas_number', 'moldb_inchikey', 'csv_file_name')]
-    setnames(dt_tmp, 'name', 'name')
-    setnames(dt_tmp, 'cas_number', 'smiles')
-    setnames(dt_tmp, 'moldb_inchikey', 'inchikey')
-    
-  } else if(grepl('PolyphenolDB_metabolites', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'PolyphenolDB_metabolites']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_PolyphenolDBm := id]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_PolyphenolDBm', 'name', 'smiles', 'formula', 'csv_file_name')]
-    setnames(dt_tmp, 'name', 'name')
-    setnames(dt_tmp, 'smiles', 'smiles')
-    setnames(dt_tmp, 'formula', 'mf')
-    
-  } else if(grepl('PolyphenolDB_compounds', basename(databases_csv))){
-    dt_tmp = fread(databases_csv)
-    dt_tmp[, data_source_is := 'PolyphenolDB_compounds']
-    dt_tmp[, csv_file_name := basename(databases_csv)]
-    dt_tmp[, dbid_PolyphenolDBc := id]
-    dt_tmp = dt_tmp[, c('data_source_is', 'dbid_PolyphenolDBc', 'name', 'smiles', 'formula', 'csv_file_name')]
-    setnames(dt_tmp, 'name', 'name')
-    setnames(dt_tmp, 'smiles', 'smiles')
-    setnames(dt_tmp, 'formula', 'mf')
-    
-  } else {
+    #harmonize column names
+    setnames(dt_tmp, 
+             db_cols,
+             dt_nomenclature[!(Info_by_database %in% c('database','database id')) & !is.na(get(trigger_hit)) & get(trigger_hit) != '']$Info_by_database)
+    } else {
     warning('Ignore ', basename(databases_csv))
   }
 
   li_collection[[i]] = dt_tmp
   
 }
-
+#assemble everything into one table
 dt_overall_table = rbindlist(li_collection, fill = TRUE, use.names = TRUE)
 
 

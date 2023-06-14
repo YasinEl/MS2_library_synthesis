@@ -1,0 +1,8 @@
+Info_by_database,PubChem_compound_list,HMDB,CyanoMetDB,PubChemLite,susdat_,toxins.csv,drugCentral,Broad_Institute,chembl_final,drugbank_final,foodDB,PolyphenolDB_metabolites,PolyphenolDB_compounds
+database,PubChem,HMDB,CyanoMetDB,PubChem Lite,NORMAN,T3DB,drugCentral,Broad Institute Drug List,chembl,drugbank,FoodDB,PolyphenolDB_metabolites,PolyphenolDB_compounds
+database id,cid,HMDB_ID,Compound identifier,Identifier,Norman_SusDat_ID,T3DB ID,id,Broad_ID,chembl_id,drugbank_id,public_id,id,id
+name,cmpdname,NAME,Compound name,Synonym,Name,Name,name,pert_iname,compound_name,name,name,name,name
+smiles,canonicalsmiles,SMILES,SMILES (canonical or isomeric),SMILES,MS_Ready_SMILES,SMILES,smiles,,canonical_smiles,smiles,cas_number,smiles,smiles
+mf,mf,CHEMICAL_FORMULA,Molecular formula (neutral),MolecularFormula,Molecular_Formula,Chemical Formula,,,,,,formula,formula
+monomass,exactmass,MONO_MASS,Monoisotopic mass (neutral),MonoisotopicMass,Monoiso_Mass,Monoisotopic Mass,,,,,,,
+inchikey,inchikey,INCHIKEY,InChlKey,InChIKey,MS_Ready_StdInChIKey,InChI Key,inchikey,InChIKey,,inchi_key,moldb_inchikey,,
