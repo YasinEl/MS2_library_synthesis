@@ -11,9 +11,22 @@ df = pd.read_csv("database_accumulation.csv", low_memory=False)
 for index,row in df.iterrows():
     smiles = row['smiles']
     try:
-        df.at[index, 'commercially_available'] = buy(smiles, catalog='zinc-instock', canonicalize=True)
+        if buy(smiles, catalog='zinc20', canonicalize=True):
+            df.at[index, 'zinc20'] = "TRUE"
+        else:
+            df.at[index, 'zinc20'] = "FALSE"
+        if buy(smiles, catalog='zinc-instock', canonicalize=True):
+            df.at[index, 'zinc-instock'] = "TRUE"
+        else:
+            df.at[index, 'zinc-instock'] = "FALSE"
+        if buy(smiles, catalog='surechembl', canonicalize=True):
+            df.at[index, 'surechembl'] = "TRUE"
+        else:
+            df.at[index, 'surechembl'] = "FALSE"
     except: 
-        df.at[index, 'commercially_available'] = "SMILES_error"
+        df.at[index, 'zinc20'] = "SMILES_error"
+        df.at[index, 'zinc-instock'] = "SMILES_error"
+        df.at[index, 'surechembl'] = "SMILES_error"
         continue
     
 
