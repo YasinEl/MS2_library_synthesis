@@ -10,10 +10,11 @@ for index,row in df.iterrows():
     smiles = row['smiles_harmonized']
     df.at[index, 'commercially_available'] = buy(smiles, catalog='zinc20')
 
-Uncomment if you want to save the intermedi
+#Uncomment if you want to save the intermediate step: the table that contains all the commercially available and not
 #df.to_csv("with_commercial_availability.csv", index=False)
 
 #Exclude those that are not commercially available
 commercially_available_df = df[df['commercially_available'] == True]
 
+#Save table of commercially available compounds
 commercially_available_df.to_csv("only_commercially_available.csv", index=False)
