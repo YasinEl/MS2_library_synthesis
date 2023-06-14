@@ -352,16 +352,26 @@ display: none;
 </div>
 
 
-<div id="mmolecules" class="section level1">
-<h1>5Mmolecules</h1>
+<div id="ms2-library-synthesis" class="section level1">
+<h1>MS2 library synthesis</h1>
 <p>Some functions to summarize different molecular databases.</p>
 </div>
 <div id="instructions-to-run-functions-from-the-command-line" class="section level1">
 <h1>Instructions to Run Functions from the Command Line</h1>
 <p>First, set the path to the project directory. For example:</p>
 <pre class="bash"><code>cd C:\Users\Dorrestein Lab\MS2_library_synthesis</code></pre>
-<p>To combine all different databases into one CSV file, run:</p>
-<pre class="bash"><code>Rscript r_module\assemble_molecule_databases.R -i Z:\5M_molecules\datasources\prepared -o Z:\5M_molecules\database_accumulation.csv</code></pre>
+<p>To combine all different databases into one CSV file, you have to
+have first download them (e.g. from the google drive). You must not
+change the column names in these csv files, and also not the csv file
+itself! You can also add more databases if you want as csv or tsv files.
+If you do you need to extend the file in data/database_nomenclature.csv.
+Just add a column with the appropriate column names as has been done for
+the others. The first row should be a substring of the csv file name
+(make sure it appears ONLY in the csvs you want this substring to match
+to; can be multiple). The second row should be the name of the database.
+I hope the rest is intuitive. Afterwards you can assemble all databases
+like this:</p>
+<pre class="bash"><code>Rscript r_module\assemble_molecule_databases.R -i Z:\5M_molecules\datasources\prepared -o Z:\5M_molecules\database_accumulation.csv -n data\database_nomenclature.csv</code></pre>
 <p>This merges different IDs, SMILES, etc., into the same columns and
 removes unused columns.</p>
 <p>To harmonize SMILES and search structural subgroups in the SMILES, as
@@ -376,7 +386,7 @@ present in the input), you can set –OnlySubgroups to True:</p>
 <pre class="bash"><code>python python_module\main.py --input_csv Z:/5M_molecules/database_accumulation.csv --output_csv Z:/5M_molecules/combined_datasources_yasin_update_command.csv --intermedResults Z:/5M_molecules --substructure_csv Z:/5M_molecules/smarts_lib.csv --OnlySubgroups True</code></pre>
 <p>Finally, to summarize everything along the harmonized SMILES (the
 final table will have one row per harmonized SMILES), run:</p>
-<pre class="bash"><code>Rscript r_module\summarize_harmonized_smiles.R -i Rscript r_module\summarize_harmonized_smiles.R -i Z:/5M_molecules/combined_datasources_yasin_update_command.csv -o Z:/5M_molecules/combined_datasources_yasin_summary_update_command.csv
+<pre class="bash"><code>Rscript r_module\summarize_harmonized_smiles.R -i Z:/5M_molecules/combined_datasources_yasin_update_command.csv -o Z:/5M_molecules/combined_datasources_yasin_summary_update_command.csv -n data/database_nomenclature.csv
 </code></pre>
 </div>
 
