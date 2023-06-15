@@ -24,7 +24,7 @@ dt_tmp = fread(input_csv)
 
 #retain columns and remove empty harmonized_smiles
 all_cols = colnames(dt_tmp)
-general_cols = c('smiles_harmonized', 'data_source_is', 'name', 'inchikey', 'mf' ,'monomass', 'csv_file_name')
+general_cols = c('smiles_harmonized', 'data_source_is', 'name', 'inchikey', 'mf' ,'monomass', 'csv_file_name', 'zinc20', 'zinc-instock', 'surechembl')
 id_cols = all_cols[grepl('dbid_', all_cols)]
 structure_cols = all_cols[grepl('has_', all_cols)]
 use_cols = c(general_cols, structure_cols, id_cols)
@@ -54,7 +54,7 @@ expr_str <- "list(
 
 # Add dbid column expressions to the string to summarize all IDs
 for(col in dbid_cols){
-  expr_str <- paste0(expr_str, ", ", col, " = paste0(unique(", col, "[!is.na(", col, ") & ", col, " != '']), collapse = ', ')")
+  expr_str <- paste0(expr_str, ", `", col, "` = paste0(unique(`", col, "`[!is.na(`", col, "`) & `", col, "` != '']), collapse = ', ')")
 }
 
 # Assemble code elements
