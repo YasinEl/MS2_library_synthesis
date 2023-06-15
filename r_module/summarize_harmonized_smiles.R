@@ -45,7 +45,11 @@ expr_str <- "list(
   mf = unique(mf[!is.na(mf) & mf != ''])[1],
   monomass = unique(monomass[!is.na(monomass) & monomass != ''])[1],
   inchikey = unique(inchikey[!is.na(inchikey) & inchikey != ''])[1],
-  csv_file_name = paste0(unique(csv_file_name), collapse = ', ')
+  csv_file_name = paste0(unique(csv_file_name), collapse = ', '),
+  zinc20 = any(zinc20 == 'TRUE'),
+  `zinc-instock` = any(`zinc-instock` == 'TRUE'),
+  surechembl = any(surechembl == 'TRUE'),
+  commerical = any(c(zinc20 == 'TRUE', `zinc-instock` == 'TRUE', surechembl == 'TRUE'))
 "
 
 # Add dbid column expressions to the string to summarize all IDs
