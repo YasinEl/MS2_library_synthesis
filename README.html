@@ -386,7 +386,7 @@ present in the input), you can set –OnlySubgroups to True:</p>
 <pre class="bash"><code>python python_module\main.py --input_csv Z:/5M_molecules/database_accumulation.csv --output_csv Z:/5M_molecules/combined_datasources_yasin_update_command.csv --intermedResults Z:/5M_molecules --substructure_csv Z:/5M_molecules/smarts_lib.csv --OnlySubgroups True</code></pre>
 <p>Finally, to summarize everything along the harmonized SMILES (the
 final table will have one row per harmonized SMILES), run:</p>
-<pre class="bash"><code>Rscript r_module\summarize_harmonized_smiles.R -i Z:/5M_molecules/combined_datasources_yasin_update_command.csv -o Z:/5M_molecules/combined_datasources_yasin_summary_update_command.csv -n data/database_nomenclature.csv
+<pre class="bash"><code>Rscript r_module\summarize_harmonized_smiles.R -i Z:/5M_molecules/combined_datasources_yasin_update_command.csv -o Z:/5M_molecules/combined_datasources_yasin_summary_update_command.csv
 </code></pre>
 </div>
 

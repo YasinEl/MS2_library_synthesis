@@ -37,6 +37,6 @@ Finally, to summarize everything along the harmonized SMILES (the final table wi
 
 
 ```bash
-Rscript r_module\summarize_harmonized_smiles.R -i Z:/5M_molecules/combined_datasources_yasin_update_command.csv -o Z:/5M_molecules/combined_datasources_yasin_summary_update_command.csv -n data/database_nomenclature.csv
+Rscript r_module\summarize_harmonized_smiles.R -i Z:/5M_molecules/combined_datasources_yasin_update_command.csv -o Z:/5M_molecules/combined_datasources_yasin_summary_update_command.csv
 
 ```
